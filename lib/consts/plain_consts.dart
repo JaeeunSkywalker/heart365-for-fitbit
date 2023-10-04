@@ -1,0 +1,1 @@
+const String appname = "Heart365";

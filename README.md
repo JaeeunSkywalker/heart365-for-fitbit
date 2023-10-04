@@ -1,6 +1,6 @@
 # heart365_for_fitbit
 
-HEART365 for Fitbit
+Heart365 for Fitbit
 
 ## Getting Started
 
