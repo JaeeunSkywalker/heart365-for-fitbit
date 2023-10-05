@@ -54,7 +54,9 @@ class MyHomePageState extends ConsumerState<MyHomePage> {
 
     allValues = await storage.readAll();
 
-    if (allValues.isNotEmpty) {}
+    if (allValues.isNotEmpty) {
+      ref.read(hasDataStateProvider.notifier).state = true;
+    }
   }
 
   @override
@@ -121,37 +123,45 @@ class MyHomePageState extends ConsumerState<MyHomePage> {
         title: const Text('메인 페이지'),
       ),
       body: Center(
-        child: ref.watch(hasDataStateProvider)
-            ? const MyPersonalDataWidget() //내 개인 데이터 대시보드
-            : ElevatedButton(
-                onPressed: () {
-                  final Uri authUrl = Uri.https(
-                    'www.fitbit.com',
-                    '/oauth2/authorize',
-                    {
-                      'response_type': 'code',
-                      'client_id': clientId,
-                      'scope': scope,
-                      'code_challenge': createCodeChallenge(codeVerifier),
-                      'code_challenge_method': 'S256',
-                      'state': state,
-                      'prompt': 'login',
-                      'redirect_uri': redirectUrl,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ref.read(hasDataStateProvider)
+                ? const Text('안녕하세요!')
+                : const Text('핏빗 로그인을 먼저 해 주세요!'),
+            ref.watch(hasDataStateProvider)
+                ? const MyPersonalDataWidget() //내 개인 데이터 대시보드
+                : ElevatedButton(
+                    onPressed: () {
+                      final Uri authUrl = Uri.https(
+                        'www.fitbit.com',
+                        '/oauth2/authorize',
+                        {
+                          'response_type': 'code',
+                          'client_id': clientId,
+                          'scope': scope,
+                          'code_challenge': createCodeChallenge(codeVerifier),
+                          'code_challenge_method': 'S256',
+                          'state': state,
+                          'prompt': 'login',
+                          'redirect_uri': redirectUrl,
+                        },
+                      );
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => WebViewScreen(
+                            uri: authUrl,
+                            codeVerifier: codeVerifier,
+                            originalState: state,
+                          ),
+                        ),
+                      );
                     },
-                  );
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => WebViewScreen(
-                        uri: authUrl,
-                        codeVerifier: codeVerifier,
-                        originalState: state,
-                      ),
-                    ),
-                  );
-                },
-                child: const Text('Login to Fitbit using Google'),
-              ),
+                    child: const Text('Login to Fitbit using Google'),
+                  ),
+          ],
+        ),
       ),
     );
   }

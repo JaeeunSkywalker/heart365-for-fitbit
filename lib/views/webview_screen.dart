@@ -5,6 +5,7 @@ import 'package:heart365_for_fitbit/consts/about_user.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 import '../provider/data_provider.dart';
+import '../services/fitbit_api_service.dart';
 import '../services/storage_service.dart';
 
 class WebViewScreen extends ConsumerStatefulWidget {
@@ -104,30 +105,21 @@ class WebViewScreenState extends ConsumerState<WebViewScreen> {
       storage.write(key: 'userId', value: userId);
       storage.write(key: 'refreshToken', value: refreshToken);
 
-      // 사용자 데이터 가져오기
-      final userProfileResponse = await Dio().get(
-        'https://api.fitbit.com/1/user/$userId/profile.json',
-        options: Options(
-          headers: {
-            'Authorization': 'Bearer $accessToken',
-          },
-        ),
-      );
+      var service = FitbitApiService();
+      service.initialize(accessToken);
+      var profile = await service.getUserProfile(userId);
 
       //메인 페이지에서 보여 줄 내용들
-      final String displayName =
-          userProfileResponse.data['user']['displayName'];
-      final String fullName = userProfileResponse.data['user']['fullName'];
-      final int age = userProfileResponse.data['user']['age'];
-      final String dateOfBirth =
-          userProfileResponse.data['user']['dateOfBirth'];
-      final String gender = userProfileResponse.data['user']['gender'];
+      final String displayName = profile['user']['displayName'];
+      final String fullName = profile['user']['fullName'];
+      final int age = profile['user']['age'];
+      final String dateOfBirth = profile['user']['dateOfBirth'];
+      final String gender = profile['user']['gender'];
       //지역 관련 값을 불러 오고 싶다면 location scope을 활성화 해야 함, 우선순위 낮음
-      // final String country = userProfileResponse.data['user']['country'];
-      final String encodedId = userProfileResponse.data['user']['encodedId'];
-      final String memberSince =
-          userProfileResponse.data['user']['memberSince'];
-      final String avatar = userProfileResponse.data['user']['avatar'];
+      // final String country = profile['user']['country'];
+      final String encodedId = profile['user']['encodedId'];
+      final String memberSince = profile['user']['memberSince'];
+      final String avatar = profile['user']['avatar'];
 
       storage.write(key: 'displayName', value: displayName);
       storage.write(key: 'fullName', value: fullName);
@@ -138,7 +130,7 @@ class WebViewScreenState extends ConsumerState<WebViewScreen> {
       storage.write(key: 'memberSince', value: memberSince);
       storage.write(key: 'avatar', value: avatar);
 
-      print(
+      print('webview_screen에서 데이터를 받아 왔습니다: '
           '$displayName, $fullName, $age, $dateOfBirth, $gender, $encodedId, $memberSince, $avatar');
     } catch (e) {
       print('Dio 호출 중 다음과 같은 에러가 발생했습니다. $e');
