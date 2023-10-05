@@ -1,8 +1,9 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:heart365_for_fitbit/provider/data_provider.dart';
+import 'package:heart365_for_fitbit/utils/logger_utils.dart';
 
+import '../services/fitbit_api_service.dart';
 import '../services/storage_service.dart';
 
 class MyPersonalDataWidget extends ConsumerStatefulWidget {
@@ -14,32 +15,20 @@ class MyPersonalDataWidget extends ConsumerStatefulWidget {
 
 class MyPersonalDataWidgetState extends ConsumerState<MyPersonalDataWidget> {
   static const storage = StorageService.storage;
+  var service = FitbitApiService();
 
   @override
   Widget build(BuildContext context) {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        // userName != null
-        //     ? Text('$userName님, 안녕하세요!')
-        //     : const Text('핏빗 로그인을 먼저 해 주세요!'),
-        const Text('안녕하세요!'),
         TextButton(
           onPressed: () async {
             String? userId = await storage.read(key: "userId");
-            String? accessToken = await storage.read(key: "accessToken");
+            // String? accessToken = await storage.read(key: "accessToken");
 
-            print('데이터 새로 불러 올 때 $userId');
-            print('데이터 새로 불러 올 때 $accessToken');
-
-            final userProfileResponse = await Dio().get(
-              'https://api.fitbit.com/1/user/$userId/profile.json',
-              options: Options(
-                headers: {
-                  'Authorization': 'Bearer $accessToken',
-                },
-              ),
-            );
+            //개인 데이터 불러 오는 기능
+            var profile = await service.getUserProfile(userId!);
+            safePrint(profile);
           },
           child: const Text('개인 데이터 새로 불러 오기'),
         ),

@@ -1,8 +1,5 @@
 import 'dart:async';
-import 'dart:convert';
-import 'dart:math';
 
-import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:heart365_for_fitbit/consts/about_user.dart';
@@ -12,6 +9,7 @@ import 'provider/data_provider.dart';
 import 'services/storage_service.dart';
 import 'views/my_personal_data_widget.dart';
 import 'views/webview_screen.dart';
+import 'utils/encryption_utils.dart';
 
 void main() => runApp(
       const ProviderScope(
@@ -54,7 +52,9 @@ class MyHomePageState extends ConsumerState<MyHomePage> {
 
     allValues = await storage.readAll();
 
-    if (allValues.isNotEmpty) {}
+    if (allValues.isNotEmpty) {
+      ref.read(hasDataStateProvider.notifier).state = true;
+    }
   }
 
   @override
@@ -71,49 +71,6 @@ class MyHomePageState extends ConsumerState<MyHomePage> {
     super.dispose();
   }
 
-  String filterAndReplace(String value) {
-    StringBuffer buffer = StringBuffer();
-    for (int i = 0; i < value.length; i++) {
-      var char = value[i];
-      if ('a'.codeUnitAt(0) <= char.codeUnitAt(0) &&
-          char.codeUnitAt(0) <= 'z'.codeUnitAt(0)) {
-        buffer.write(char);
-      } else if ('0'.codeUnitAt(0) <= char.codeUnitAt(0) &&
-          char.codeUnitAt(0) <= '9'.codeUnitAt(0)) {
-        buffer.write(char);
-      }
-    }
-    return buffer.toString();
-  }
-
-  String generateRandomString(int targetLength, int byteLength) {
-    final random = Random();
-    String result;
-    do {
-      final values = List<int>.generate(byteLength, (i) => random.nextInt(256));
-      result = filterAndReplace(base64UrlEncode(values));
-    } while (result.length < targetLength);
-    return result.substring(0, targetLength);
-  }
-
-//128자 여야 함
-  String generateCodeVerifier() {
-    return generateRandomString(
-        128, 180); // 180은 예상 최대 바이트 길이입니다. 조정이 필요할 수 있습니다.
-  }
-
-//43자 여야 함
-  String createCodeChallenge(String codeVerifier) {
-    List<int> codeVerifierBytes = utf8.encode(codeVerifier);
-    List<int> sha256Bytes = sha256.convert(codeVerifierBytes).bytes;
-    return base64UrlEncode(sha256Bytes).replaceAll('=', '');
-  }
-
-//32자 여야 함
-  String generateState() {
-    return generateRandomString(32, 45); // 45는 예상 최대 바이트 길이입니다. 조정이 필요할 수 있습니다.
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -121,37 +78,45 @@ class MyHomePageState extends ConsumerState<MyHomePage> {
         title: const Text('메인 페이지'),
       ),
       body: Center(
-        child: ref.watch(hasDataStateProvider)
-            ? const MyPersonalDataWidget() //내 개인 데이터 대시보드
-            : ElevatedButton(
-                onPressed: () {
-                  final Uri authUrl = Uri.https(
-                    'www.fitbit.com',
-                    '/oauth2/authorize',
-                    {
-                      'response_type': 'code',
-                      'client_id': clientId,
-                      'scope': scope,
-                      'code_challenge': createCodeChallenge(codeVerifier),
-                      'code_challenge_method': 'S256',
-                      'state': state,
-                      'prompt': 'login',
-                      'redirect_uri': redirectUrl,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ref.read(hasDataStateProvider)
+                ? const Text('안녕하세요!')
+                : const Text('핏빗 로그인을 먼저 해 주세요!'),
+            ref.watch(hasDataStateProvider)
+                ? const MyPersonalDataWidget() //내 개인 데이터 대시보드
+                : ElevatedButton(
+                    onPressed: () {
+                      final Uri authUrl = Uri.https(
+                        'www.fitbit.com',
+                        '/oauth2/authorize',
+                        {
+                          'response_type': 'code',
+                          'client_id': clientId,
+                          'scope': scope,
+                          'code_challenge': createCodeChallenge(codeVerifier),
+                          'code_challenge_method': 'S256',
+                          'state': state,
+                          'prompt': 'login',
+                          'redirect_uri': redirectUrl,
+                        },
+                      );
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => WebViewScreen(
+                            uri: authUrl,
+                            codeVerifier: codeVerifier,
+                            originalState: state,
+                          ),
+                        ),
+                      );
                     },
-                  );
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => WebViewScreen(
-                        uri: authUrl,
-                        codeVerifier: codeVerifier,
-                        originalState: state,
-                      ),
-                    ),
-                  );
-                },
-                child: const Text('Login to Fitbit using Google'),
-              ),
+                    child: const Text('Login to Fitbit using Google'),
+                  ),
+          ],
+        ),
       ),
     );
   }

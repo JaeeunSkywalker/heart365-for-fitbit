@@ -5,6 +5,7 @@ import 'package:heart365_for_fitbit/consts/about_user.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 import '../provider/data_provider.dart';
+import '../services/fitbit_api_service.dart';
 import '../services/storage_service.dart';
 
 class WebViewScreen extends ConsumerStatefulWidget {
@@ -92,54 +93,43 @@ class WebViewScreenState extends ConsumerState<WebViewScreen> {
       );
 
       //response에서 필요한 값 추출
-      final String accessToken = tokenResponse.data['access_token'];
-      print('accessToken 값 받았습니다. $accessToken');
-      final String userId = tokenResponse.data['user_id'];
-      print('userId 값 받았습니다. $userId');
-      final String refreshToken = tokenResponse.data['refresh_token'];
-      print('refreshToken 값 받았습니다. $refreshToken');
+      Map<String, String> tokenDataToStore = {
+        'accessToken': tokenResponse.data['access_token'],
+        'userId': tokenResponse.data['user_id'],
+        'refreshToken': tokenResponse.data['refresh_token'],
+      };
 
       //accessToken, userId 저장
-      storage.write(key: 'accessToken', value: accessToken);
-      storage.write(key: 'userId', value: userId);
-      storage.write(key: 'refreshToken', value: refreshToken);
+      tokenDataToStore.forEach((key, value) {
+        storage.write(key: key, value: value);
+      });
 
-      // 사용자 데이터 가져오기
-      final userProfileResponse = await Dio().get(
-        'https://api.fitbit.com/1/user/$userId/profile.json',
-        options: Options(
-          headers: {
-            'Authorization': 'Bearer $accessToken',
-          },
-        ),
-      );
+      var service = FitbitApiService();
+      service.initialize(tokenDataToStore['accessToken']!);
+      var profile = await service.getUserProfile(tokenDataToStore['userId']!);
 
       //메인 페이지에서 보여 줄 내용들
-      final String displayName =
-          userProfileResponse.data['user']['displayName'];
-      final String fullName = userProfileResponse.data['user']['fullName'];
-      final int age = userProfileResponse.data['user']['age'];
-      final String dateOfBirth =
-          userProfileResponse.data['user']['dateOfBirth'];
-      final String gender = userProfileResponse.data['user']['gender'];
-      //지역 관련 값을 불러 오고 싶다면 location scope을 활성화 해야 함, 우선순위 낮음
-      // final String country = userProfileResponse.data['user']['country'];
-      final String encodedId = userProfileResponse.data['user']['encodedId'];
-      final String memberSince =
-          userProfileResponse.data['user']['memberSince'];
-      final String avatar = userProfileResponse.data['user']['avatar'];
+      final user = profile['user'];
 
-      storage.write(key: 'displayName', value: displayName);
-      storage.write(key: 'fullName', value: fullName);
-      storage.write(key: 'age', value: age.toString());
-      storage.write(key: 'dateOfBirth', value: dateOfBirth);
-      storage.write(key: 'gender', value: gender);
-      storage.write(key: 'encodedId', value: encodedId);
-      storage.write(key: 'memberSince', value: memberSince);
-      storage.write(key: 'avatar', value: avatar);
+      final Map<String, dynamic> userDataToStore = {
+        'displayName': user['displayName'],
+        'fullName': user['fullName'],
+        'age': user['age'].toString(),
+        'dateOfBirth': user['dateOfBirth'],
+        'gender': user['gender'],
+        //지역 관련 값을 불러 오고 싶다면 location scope을 활성화 해야 함, 우선순위 낮음
+        // final String country = profile['user']['country'];
+        'encodedId': user['encodedId'],
+        'memberSince': user['memberSince'],
+        'avatar': user['avatar'],
+      };
 
-      print(
-          '$displayName, $fullName, $age, $dateOfBirth, $gender, $encodedId, $memberSince, $avatar');
+      userDataToStore.forEach((key, value) {
+        storage.write(key: key, value: value.toString());
+      });
+
+      // print(
+      //     'webview_screen에서 데이터를 받아 왔습니다: ${userDataToStore.values.join(', ')}');
     } catch (e) {
       print('Dio 호출 중 다음과 같은 에러가 발생했습니다. $e');
     }
