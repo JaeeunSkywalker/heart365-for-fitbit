@@ -42,10 +42,10 @@ class WebViewScreenState extends ConsumerState<WebViewScreen> {
             if (request.url.startsWith(redirectUrl)) {
               final Uri uri = Uri.parse(request.url);
               handleReceivedUri(uri);
+              ref.read(loginStatusProvider.notifier).state = true;
 
               //웹뷰에서 'webpage not available'를 표시하지 않기 위해 리디렉션을 중지
               //하는 코드이나 실제로 적용하면 무한 로딩 발생해서 적용하지 않음
-              ref.read(hasDataStateProvider.notifier).state = true;
               Navigator.pop(context);
               return NavigationDecision.prevent;
             }

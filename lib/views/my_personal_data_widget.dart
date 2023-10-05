@@ -30,14 +30,14 @@ class MyPersonalDataWidgetState extends ConsumerState<MyPersonalDataWidget> {
             var profile = await service.getUserProfile(userId!);
             safePrint(profile);
           },
-          child: const Text('개인 데이터 새로 불러 오기'),
+          child: const Text('최신 데이터 불러 오기'),
         ),
         TextButton(
           onPressed: () async {
             storage.deleteAll();
-            ref.read(hasDataStateProvider.notifier).state = false;
+            ref.read(loginStatusProvider.notifier).state = false;
           },
-          child: const Text('앱 내 모든 개인 데이터 삭제하고 재로그인하기'),
+          child: const Text('로그아웃'),
         ),
       ],
     );

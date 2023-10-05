@@ -20,9 +20,7 @@ class FitbitApiService {
 
   Future<dynamic> getUserProfile(String userId) async {
     // 토큰이 없다면 저장소에서 가져옵니다.
-    if (accessToken == null) {
-      accessToken = await storage.read(key: 'accessToken');
-    }
+    accessToken = await storage.read(key: 'accessToken');
 
     return _get('/1/user/$userId/profile.json');
   }

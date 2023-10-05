@@ -2,14 +2,15 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:heart365_for_fitbit/consts/about_user.dart';
 import 'package:heart365_for_fitbit/consts/plain_consts.dart';
+import 'package:rxdart/rxdart.dart';
 
 import 'provider/data_provider.dart';
 import 'services/storage_service.dart';
 import 'views/my_personal_data_widget.dart';
-import 'views/webview_screen.dart';
 import 'utils/encryption_utils.dart';
+import 'views/webview_screen.dart';
+import 'consts/about_user.dart';
 
 void main() => runApp(
       const ProviderScope(
@@ -40,20 +41,20 @@ class MyHomePage extends ConsumerStatefulWidget {
 class MyHomePageState extends ConsumerState<MyHomePage> {
   String codeVerifier = '';
   String state = '';
-  Map<String, String> allValues = {};
 
-  StreamSubscription? _sub;
+  //싱글톤 객체 만들어 놓음
+  var storage = StorageService.storage;
 
-  Future<void> _loadInitialDate() async {
-    //싱글톤 객체 만들어 놓음
-    const storage = StorageService.storage;
+  //rxdart stream을 시작하자!
+  final allOfUserDataController = BehaviorSubject<Map<String, dynamic>>();
 
-    allValues = await storage.readAll();
+  Future<void> _loadDate() async {
+    final data = await storage.readAll();
+    allOfUserDataController.add(data); // 데이터를 스트림에 추가합니다.
 
-    if (allValues.isNotEmpty) {
+    if (data.isNotEmpty) {
+      //기본값은 false이나 flutter_secure_storage에 잔여 데이터가 있으면 true가 된다.
       ref.read(hasDataStateProvider.notifier).state = true;
-      ref.read(userNameProvider.notifier).state =
-          allValues['displayName'] ?? '사용자 이름';
     }
   }
 
@@ -62,73 +63,90 @@ class MyHomePageState extends ConsumerState<MyHomePage> {
     super.initState();
     codeVerifier = generateCodeVerifier();
     state = generateState();
-    _loadInitialDate();
+    _loadDate();
   }
 
   @override
   void dispose() {
-    _sub?.cancel();
     super.dispose();
+    allOfUserDataController.close(); // 리소스를 해제합니다.
   }
 
   @override
   Widget build(BuildContext context) {
-    String userName = ref.watch(userNameProvider);
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('메인 페이지'),
-      ),
-      body: Center(
-        child: Container(
-          decoration: const BoxDecoration(),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ref.watch(hasDataStateProvider)
-                  ? Center(
-                      child: Text(
-                        '안녕하세요 $userName님!',
-                      ),
-                    )
-                  : Center(
-                      child: const Text('핏빗 로그인을 먼저 해 주세요!'),
-                    ),
-              ref.watch(hasDataStateProvider)
-                  ? const MyPersonalDataWidget() //내 개인 데이터 대시보드
-                  : ElevatedButton(
-                      onPressed: () {
-                        final Uri authUrl = Uri.https(
-                          'www.fitbit.com',
-                          '/oauth2/authorize',
-                          {
-                            'response_type': 'code',
-                            'client_id': clientId,
-                            'scope': scope,
-                            'code_challenge': createCodeChallenge(codeVerifier),
-                            'code_challenge_method': 'S256',
-                            'state': state,
-                            'prompt': 'login',
-                            'redirect_uri': redirectUrl,
-                          },
-                        );
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => WebViewScreen(
-                              uri: authUrl,
-                              codeVerifier: codeVerifier,
-                              originalState: state,
-                            ),
-                          ),
-                        );
-                      },
-                      child: const Text('Login to Fitbit using Google'),
-                    ),
-            ],
+    return StreamBuilder<Map<String, dynamic>>(
+      stream: allOfUserDataController.stream,
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const CircularProgressIndicator(); // 로딩 인디케이터
+        }
+        final data = snapshot.data!;
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('메인 페이지'),
           ),
-        ),
-      ),
+          body: Center(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (ref.watch(loginStatusProvider)) ...[
+                  Container(
+                    width: 100.0,
+                    height: 100.0,
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        //TODO:이미지를 캐싱할 수 있지 않을까?
+                        image: NetworkImage(data['avatar']),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                  Center(
+                    child: Text(
+                      '안녕하세요 ${data['displayName']}님!',
+                    ),
+                  ),
+                  const MyPersonalDataWidget(), //내 개인 데이터 대시보드
+                ] else ...[
+                  const Center(
+                    child: Text('핏빗 로그인을 먼저 해 주세요!'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      final Uri authUrl = Uri.https(
+                        'www.fitbit.com',
+                        '/oauth2/authorize',
+                        {
+                          'response_type': 'code',
+                          'client_id': clientId,
+                          'scope': scope,
+                          'code_challenge': createCodeChallenge(codeVerifier),
+                          'code_challenge_method': 'S256',
+                          'state': state,
+                          'prompt': 'login',
+                          'redirect_uri': redirectUrl,
+                        },
+                      );
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => WebViewScreen(
+                            uri: authUrl,
+                            codeVerifier: codeVerifier,
+                            originalState: state,
+                          ),
+                        ),
+                      );
+                    },
+                    child: const Text('구글로 핏빗 로그인'),
+                  ),
+                ]
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }
