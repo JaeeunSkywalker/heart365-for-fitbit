@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:heart365_for_fitbit/provider/data_provider.dart';
+import 'package:heart365_for_fitbit/utils/logger_utils.dart';
 
 import '../services/fitbit_api_service.dart';
 import '../services/storage_service.dart';
@@ -23,14 +24,11 @@ class MyPersonalDataWidgetState extends ConsumerState<MyPersonalDataWidget> {
         TextButton(
           onPressed: () async {
             String? userId = await storage.read(key: "userId");
-            String? accessToken = await storage.read(key: "accessToken");
-
-            print('데이터 새로 불러 올 때 $userId');
-            print('데이터 새로 불러 올 때 $accessToken');
+            // String? accessToken = await storage.read(key: "accessToken");
 
             //개인 데이터 불러 오는 기능
             var profile = await service.getUserProfile(userId!);
-            print(profile);
+            safePrint(profile);
           },
           child: const Text('개인 데이터 새로 불러 오기'),
         ),
