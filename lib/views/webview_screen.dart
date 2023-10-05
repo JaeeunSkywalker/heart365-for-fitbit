@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:heart365_for_fitbit/consts/about_user.dart';
+import 'package:heart365_for_fitbit/services/data_process_service.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 import '../provider/data_provider.dart';
@@ -42,11 +43,10 @@ class WebViewScreenState extends ConsumerState<WebViewScreen> {
             if (request.url.startsWith(redirectUrl)) {
               final Uri uri = Uri.parse(request.url);
               handleReceivedUri(uri);
+              //로그인도 했고 데이터도 담김
               ref.read(loginStatusProvider.notifier).state = true;
+              ref.read(hasDataStateProvider.notifier).state = true;
 
-              //웹뷰에서 'webpage not available'를 표시하지 않기 위해 리디렉션을 중지
-              //하는 코드이나 실제로 적용하면 무한 로딩 발생해서 적용하지 않음
-              Navigator.pop(context);
               return NavigationDecision.prevent;
             }
             return NavigationDecision.navigate;
@@ -124,12 +124,16 @@ class WebViewScreenState extends ConsumerState<WebViewScreen> {
         'avatar': user['avatar'],
       };
 
+      //accessToken, userId 저장
       userDataToStore.forEach((key, value) {
-        storage.write(key: key, value: value.toString());
+        storage.write(key: key, value: value);
       });
 
-      // print(
-      //     'webview_screen에서 데이터를 받아 왔습니다: ${userDataToStore.values.join(', ')}');
+      loadData(ref);
+
+      //웹뷰에서 'webpage not available'를 표시하지 않기 위해 리디렉션을 중지
+      //하는 코드이나 실제로 적용하면 무한 로딩 발생해서 적용하지 않음
+      Navigator.pop(context);
     } catch (e) {
       print('Dio 호출 중 다음과 같은 에러가 발생했습니다. $e');
     }

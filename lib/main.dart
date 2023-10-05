@@ -1,8 +1,7 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:heart365_for_fitbit/consts/plain_consts.dart';
+import 'package:heart365_for_fitbit/services/data_process_service.dart';
 import 'package:rxdart/rxdart.dart';
 
 import 'provider/data_provider.dart';
@@ -46,24 +45,17 @@ class MyHomePageState extends ConsumerState<MyHomePage> {
   var storage = StorageService.storage;
 
   //rxdart stream을 시작하자!
-  final allOfUserDataController = BehaviorSubject<Map<String, dynamic>>();
-
-  Future<void> _loadDate() async {
-    final data = await storage.readAll();
-    allOfUserDataController.add(data); // 데이터를 스트림에 추가합니다.
-
-    if (data.isNotEmpty) {
-      //기본값은 false이나 flutter_secure_storage에 잔여 데이터가 있으면 true가 된다.
-      ref.read(hasDataStateProvider.notifier).state = true;
-    }
-  }
+  final allOfUserDataController =
+      BehaviorSubject<Map<String, dynamic>>.seeded({}); // 초기 빈 맵으로 시작
 
   @override
   void initState() {
     super.initState();
     codeVerifier = generateCodeVerifier();
     state = generateState();
-    _loadDate();
+    loadData(ref).then((data) {
+      allOfUserDataController.add(data);
+    });
   }
 
   @override
@@ -77,35 +69,40 @@ class MyHomePageState extends ConsumerState<MyHomePage> {
     return StreamBuilder<Map<String, dynamic>>(
       stream: allOfUserDataController.stream,
       builder: (context, snapshot) {
-        if (!snapshot.hasData) {
+        if (!snapshot.hasData || snapshot.data == null) {
           return const CircularProgressIndicator(); // 로딩 인디케이터
         }
         final data = snapshot.data!;
+
         return Scaffold(
           appBar: AppBar(
-            title: const Text('메인 페이지'),
+            title: Text('${data['displayName']}님 차트'),
           ),
           body: Center(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                if (ref.watch(loginStatusProvider)) ...[
-                  Container(
-                    width: 100.0,
-                    height: 100.0,
-                    decoration: BoxDecoration(
-                      image: DecorationImage(
-                        //TODO:이미지를 캐싱할 수 있지 않을까?
-                        image: NetworkImage(data['avatar']),
-                        fit: BoxFit.cover,
+                if (ref.watch(hasDataStateProvider)) ...[
+                  Row(
+                    children: [
+                      Container(
+                        width: 100.0,
+                        height: 100.0,
+                        decoration: BoxDecoration(
+                          image: DecorationImage(
+                            //TODO:이미지를 캐싱할 수 있지 않을까?
+                            image: NetworkImage(data['avatar']),
+                            fit: BoxFit.cover,
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                  Center(
-                    child: Text(
-                      '안녕하세요 ${data['displayName']}님!',
-                    ),
+                      Column(
+                        children: [
+                          Text(
+                            '성명: ${data['fullName']}',
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                   const MyPersonalDataWidget(), //내 개인 데이터 대시보드
                 ] else ...[
