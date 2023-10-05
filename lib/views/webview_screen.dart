@@ -68,13 +68,13 @@ class WebViewScreenState extends ConsumerState<WebViewScreen> {
     String receivedState = uri.queryParameters['state']!;
 
     if (widget.originalState != receivedState) {
-      print('State values do not match!');
+      print('2개의 state 값이 일치하지 않습니다.');
       return;
     }
 
     try {
       // Access token 요청
-      final response = await Dio().post(
+      final tokenResponse = await Dio().post(
         'https://api.fitbit.com/oauth2/token',
         data: {
           "client_id": clientId,
@@ -91,27 +91,57 @@ class WebViewScreenState extends ConsumerState<WebViewScreen> {
         ),
       );
 
-      final String accessToken = response.data['access_token'];
+      //response에서 필요한 값 추출
+      final String accessToken = tokenResponse.data['access_token'];
       print('accessToken 값 받았습니다. $accessToken');
-      final String userId = response.data['user_id'];
+      final String userId = tokenResponse.data['user_id'];
       print('userId 값 받았습니다. $userId');
+      final String refreshToken = tokenResponse.data['refresh_token'];
+      print('refreshToken 값 받았습니다. $refreshToken');
 
       //accessToken, userId 저장
       storage.write(key: 'accessToken', value: accessToken);
       storage.write(key: 'userId', value: userId);
+      storage.write(key: 'refreshToken', value: refreshToken);
 
       // 사용자 데이터 가져오기
-      final userProfile = await Dio().get(
-        'https://api.fitbit.com/1/user/-/profile.json',
+      final userProfileResponse = await Dio().get(
+        'https://api.fitbit.com/1/user/$userId/profile.json',
         options: Options(
           headers: {
             'Authorization': 'Bearer $accessToken',
           },
         ),
       );
-      // 이후, userProfile을 처리하는 코드를 여기에 추가합니다.
+
+      //메인 페이지에서 보여 줄 내용들
+      final String displayName =
+          userProfileResponse.data['user']['displayName'];
+      final String fullName = userProfileResponse.data['user']['fullName'];
+      final int age = userProfileResponse.data['user']['age'];
+      final String dateOfBirth =
+          userProfileResponse.data['user']['dateOfBirth'];
+      final String gender = userProfileResponse.data['user']['gender'];
+      //지역 관련 값을 불러 오고 싶다면 location scope을 활성화 해야 함, 우선순위 낮음
+      // final String country = userProfileResponse.data['user']['country'];
+      final String encodedId = userProfileResponse.data['user']['encodedId'];
+      final String memberSince =
+          userProfileResponse.data['user']['memberSince'];
+      final String avatar = userProfileResponse.data['user']['avatar'];
+
+      storage.write(key: 'displayName', value: displayName);
+      storage.write(key: 'fullName', value: fullName);
+      storage.write(key: 'age', value: age.toString());
+      storage.write(key: 'dateOfBirth', value: dateOfBirth);
+      storage.write(key: 'gender', value: gender);
+      storage.write(key: 'encodedId', value: encodedId);
+      storage.write(key: 'memberSince', value: memberSince);
+      storage.write(key: 'avatar', value: avatar);
+
+      print(
+          '$displayName, $fullName, $age, $dateOfBirth, $gender, $encodedId, $memberSince, $avatar');
     } catch (e) {
-      print('Error during Dio call: $e');
+      print('Dio 호출 중 다음과 같은 에러가 발생했습니다. $e');
     }
   }
 }

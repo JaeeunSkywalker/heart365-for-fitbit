@@ -118,7 +118,7 @@ class MyHomePageState extends ConsumerState<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('로그인 페이지'),
+        title: const Text('메인 페이지'),
       ),
       body: Center(
         child: ref.watch(hasDataStateProvider)
