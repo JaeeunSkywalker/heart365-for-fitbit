@@ -111,8 +111,8 @@ class WebViewScreenState extends ConsumerState<WebViewScreen> {
       //유저 기본 정보
       var userData = await service.getUserProfile(tokenDataToStore['userId']!);
       //심전도 데이터, 여기서 ecgReadings와 pagination 데이터가 총 2개 나온다.
-      // var ecgData = await service.getEcgLogList(tokenDataToStore['userId']!);
-      // print(ecgData);
+      var ecgData = await service.getEcgLogList(tokenDataToStore['userId']!);
+      print(ecgData);
 
       //메인 페이지에서 보여 줄 내용들
       //주의: 얘 List임

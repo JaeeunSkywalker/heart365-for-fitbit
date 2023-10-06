@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:heart365_for_fitbit/provider/data_provider.dart';
+import 'package:heart365_for_fitbit/views/my_data_widget.dart';
 
 import '../services/fitbit_api_service.dart';
 import '../services/storage_service.dart';
@@ -23,6 +23,15 @@ class MyPersonalDataWidgetState extends ConsumerState<MyPersonalDataWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final Map<String, String> displayData = {
+      '성명': widget.userData['fullName'] as String,
+      '나이': widget.userData['age'] as String,
+      '생년월일': widget.userData['dateOfBirth'] as String,
+      '성별': widget.userData['gender'] as String,
+      '기기명': widget.userData['encodedId'] as String,
+      '${widget.userData['memberSince'] as String}부터': '핏빗을 이용 중입니다.',
+    };
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
@@ -43,53 +52,13 @@ class MyPersonalDataWidgetState extends ConsumerState<MyPersonalDataWidget> {
             const SizedBox(width: 10.0),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '성명: ${widget.userData['fullName']}',
-                ),
-                Text(
-                  '나이: ${widget.userData['age']}',
-                ),
-                Text(
-                  '생년월일: ${widget.userData['dateOfBirth']}',
-                ),
-                Text(
-                  '성별: ${widget.userData['gender']}',
-                ),
-                Text(
-                  '기기명: ${widget.userData['encodedId']}',
-                ),
-                Text(
-                  '${widget.userData['memberSince']}부터 핏빗을 이용 중입니다.',
-                ),
-              ],
+              children: displayData.entries.map((entry) {
+                return Text('${entry.key}: ${entry.value}');
+              }).toList(),
             ),
           ],
         ),
-        TextButton(
-          onPressed: () async {
-            String? userId = await storage.read(key: "userId");
-            // String? accessToken = await storage.read(key: "accessToken");
-
-            //개인 데이터 불러 오는 기능
-            var profile = await service.getUserProfile(userId!);
-            // var ecg = await service.getEcgLogList(userId!);
-
-            // safePrint(ecg);
-            // print(ecg);
-            print(profile.toString());
-          },
-          child: const Text('최신 데이터 불러 오기'),
-        ),
-        TextButton(
-          onPressed: () async {
-            storage.deleteAll();
-            //로그아웃하고 모든 데이터 삭제
-            ref.read(loginStatusProvider.notifier).state = false;
-            ref.read(hasDataStateProvider.notifier).state = false;
-          },
-          child: const Text('로그아웃'),
-        ),
+        MyDataWidget(),
       ],
     );
   }

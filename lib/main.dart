@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:heart365_for_fitbit/consts/plain_consts.dart';
@@ -11,11 +13,15 @@ import 'utils/encryption_utils.dart';
 import 'views/webview_screen.dart';
 import 'consts/about_user.dart';
 
-void main() => runApp(
-      const ProviderScope(
-        child: MyApp(),
-      ),
-    );
+void main() {
+  var appDataDir = Directory('/data/data/com.jaeeun.shin.heart365_for_fitbit/');
+  print(appDataDir.path);
+  runApp(
+    const ProviderScope(
+      child: MyApp(),
+    ),
+  );
+}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -82,7 +88,7 @@ class MyHomePageState extends ConsumerState<MyHomePage> {
           appBar: AppBar(
             title: data['displayName'] != null
                 ? Text('${data['displayName']}님 차트')
-                : Text('메인 페이지'),
+                : const Text('메인 페이지'),
           ),
           body: SingleChildScrollView(
             child: Column(
