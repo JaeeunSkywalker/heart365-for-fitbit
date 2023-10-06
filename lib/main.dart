@@ -66,6 +66,10 @@ class MyHomePageState extends ConsumerState<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    // 현재 화면의 너비와 높이 가져오기
+    double width = MediaQuery.of(context).size.width;
+    double height = MediaQuery.of(context).size.height;
+
     return StreamBuilder<Map<String, dynamic>>(
       stream: allOfUserDataController.stream,
       builder: (context, snapshot) {
@@ -76,35 +80,17 @@ class MyHomePageState extends ConsumerState<MyHomePage> {
 
         return Scaffold(
           appBar: AppBar(
-            title: Text('${data['displayName']}님 차트'),
+            title: data['displayName'] != null
+                ? Text('${data['displayName']}님 차트')
+                : Text('메인 페이지'),
           ),
-          body: Center(
+          body: SingleChildScrollView(
             child: Column(
               children: [
                 if (ref.watch(hasDataStateProvider)) ...[
-                  Row(
-                    children: [
-                      Container(
-                        width: 100.0,
-                        height: 100.0,
-                        decoration: BoxDecoration(
-                          image: DecorationImage(
-                            //TODO:이미지를 캐싱할 수 있지 않을까?
-                            image: NetworkImage(data['avatar']),
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      ),
-                      Column(
-                        children: [
-                          Text(
-                            '성명: ${data['fullName']}',
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  const MyPersonalDataWidget(), //내 개인 데이터 대시보드
+                  MyPersonalDataWidget(
+                    userData: data,
+                  ), //내 개인 데이터 대시보드
                 ] else ...[
                   const Center(
                     child: Text('핏빗 로그인을 먼저 해 주세요!'),

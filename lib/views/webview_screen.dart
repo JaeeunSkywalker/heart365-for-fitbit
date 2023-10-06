@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -106,28 +108,67 @@ class WebViewScreenState extends ConsumerState<WebViewScreen> {
 
       var service = FitbitApiService();
       service.initialize(tokenDataToStore['accessToken']!);
-      var profile = await service.getUserProfile(tokenDataToStore['userId']!);
+      //유저 기본 정보
+      var userData = await service.getUserProfile(tokenDataToStore['userId']!);
+      //심전도 데이터, 여기서 ecgReadings와 pagination 데이터가 총 2개 나온다.
+      // var ecgData = await service.getEcgLogList(tokenDataToStore['userId']!);
+      // print(ecgData);
 
       //메인 페이지에서 보여 줄 내용들
-      final user = profile['user'];
+      //주의: 얘 List임
+      // final ecg = ecgData['ecgReadings'] as List<dynamic>;
+
+      //얘는 Map임
+      // final pagination = ecgData['pagination'];
 
       final Map<String, dynamic> userDataToStore = {
-        'displayName': user['displayName'],
-        'fullName': user['fullName'],
-        'age': user['age'].toString(),
-        'dateOfBirth': user['dateOfBirth'],
-        'gender': user['gender'],
-        //지역 관련 값을 불러 오고 싶다면 location scope을 활성화 해야 함, 우선순위 낮음
-        // final String country = profile['user']['country'];
-        'encodedId': user['encodedId'],
-        'memberSince': user['memberSince'],
-        'avatar': user['avatar'],
+        'displayName': userData.displayName,
+        'fullName': userData.fullName,
+        'age': userData.age,
+        'dateOfBirth': userData.dateOfBirth,
+        'gender': userData.gender,
+        'encodedId': userData.encodedId,
+        'memberSince': userData.memberSince,
+        'avatar': userData.avatar,
       };
 
-      //accessToken, userId 저장
+      // final List<Map<String, dynamic>> ecgDataToStore = ecg.map((reading) {
+      //   return {
+      //     'startTime': reading['startTime'],
+      //     'averageHeartRate': reading['averageHeartRate'],
+      //     'resultClassification': reading['resultClassification'],
+      //     'waveformSamples': reading['waveformSamples'],
+      //     'samplingFrequencyHz': reading['samplingFrequencyHz'],
+      //     'scalingFactor': reading['scalingFactor'],
+      //     'numberOfWaveformSamples': reading['numberOfWaveformSamples'],
+      //     'leadNumber': reading['leadNumber'],
+      //     'featureVersion': reading['featureVersion'],
+      //     'deviceName': reading['deviceName'],
+      //     'firmwareVersion': reading['firmwareVersion'],
+      //   };
+      // }).toList();
+
+      // final Map<String, dynamic> paginationDataToStore = {
+      //   'afterDate': pagination['afterDate'],
+      //   'beforeDate': pagination['beforeDate'],
+      //   'limit': pagination['limit'],
+      //   'next': pagination['next'],
+      //   'offset': pagination['offset'],
+      //   'previous': pagination['previous'],
+      //   'sort': pagination['sort'],
+      // };
+
+      //userData 저장
       userDataToStore.forEach((key, value) {
         storage.write(key: key, value: value);
       });
+
+      //ecgData 저장
+
+      //paginationData 저장
+      // paginationDataToStore.forEach((key, value) {
+      //   storage.write(key: key, value: value);
+      // });
 
       loadData(ref);
 
