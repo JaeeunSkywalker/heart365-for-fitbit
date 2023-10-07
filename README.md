@@ -1,16 +1,24 @@
-# heart365_for_fitbit
-
-Heart365 for Fitbit
-
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+# 🩺 하트365(Heart365): 당신의 심장 건강 관리 파트너<br>
+하트365는 심전도(ECG, EKG) 데이터를 분석하고 관리하는 플러터(Flutter) 기반 모바일 앱입니다. 이 앱은 사용자들이 건강 데이터를 더 효과적으로 이해하고 관리할 수 있도록 도와주는 목적으로 개발되었습니다.<br>
+## 🌟 주요 기능
+**심전도 기록**: 사용자의 ECG 기록을 정확하게 불러와 시간 순서대로 표시하며, 직관적인 그래프로도 데이터를 시각화합니다.<br>
+**비정상 패턴 알림**: ECG 결과를 통해 비정상 패턴을 실시간으로 감지하여 사용자에게 알림을 전송합니다.<br>
+**시간대별 통계 및 시각화**: ECG 데이터를 시작 시간을 기준으로 분석하여, 시간대별, 일별, 주별, 월별로 통계와 패턴을 사용자에게 제공합니다.<br>
+**데이터 페이징**: 큰 데이터셋에 대하여 사용자의 응답 시간을 줄이기 위해 pagination 정보를 활용하여 데이터를 여러 페이지로 분할하여 제공합니다.<br>
+## 🛠 기술 스택 및 아키텍처
+이 앱은 플러터를 기반으로 개발되었고, 핏빗(Fitbit) API를 백엔드로 사용하여 심전도 데이터를 처리합니다. 각 모듈은 다음과 같은 역할을 합니다:<br>
+**Authentication Module**: Google OAuth2를 통한 사용자 인증 처리.<br>
+**ECG Data Fetching Module**: 핏빗 API와의 통신을 통해 ECG 데이터 수집.<br>
+**Data Visualization Module**: 수집된 ECG 데이터의 그래프 시각화.<br>
+**Notifications Module**: 비정상 패턴 감지 및 사용자 알림 전송.<br>
+**Data Pagination Module**: 대용량 ECG 데이터 처리를 위한 페이징 처리.<br>
+하트365는 MVVM 아키텍처를 기반으로 설계되었으나 현재 ViewModel이 비어 있습니다. 기술 선택의 이유는 성능 최적화와 플러터의 특성을 최대한 활용하기 위함입니다.<br>
+## 💼 프로젝트 배경
+하트365는 메쥬(MEZOO)의 면접 전에 개발한 심전도 모니터링 앱입니다.<br> 
+심장 건강은 매우 중요한 주제로, 이 앱을 통해 사용자들이 자신의 심장 건강을 실시간으로 체크하고, 이를 바탕으로 건강 관리에 도움을 받을 수 있습니다.<br>
+### ⚠️ 이 프로젝트는 메쥬(MEZOO)의 면접 포트폴리오로 제작되었습니다.
+### 앱의 모든 기능은 진단 목적이 아니며, 실제 의료적 판단에 사용되어서는 안됩니다.<br>
+#### 이 프로젝트는 핏빗 개발자 사이트에서 받을 수 있는 clientId 등의 정보가 없으면 구동할 수 없습니다.
+#### 개발자의 개인 정보를 보호하기 위해 몇 가지 주요 정보를 감춘 결과니 앱 구동 결과물에 대해서는 스크린샷과 레코딩된 동영상을 확인하시는 걸 권장합니다.
+#### 개인 정보 관련한 소스 외의 모든 코드는 공개되어 있습니다.<br>
+⭐️ 많은 관심과 피드백 부탁드립니다.⭐️<br>
