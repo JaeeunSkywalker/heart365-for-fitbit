@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../provider/data_provider.dart';
 import 'storage_service.dart';
 
-//flutter_secure_storage에 저장된 데이터 불러 오는 함수
-Future<Map<String, dynamic>> loadData(WidgetRef ref) async {
+//flutter_secure_storage에 저장된 데이터 불러 오는 함수.
+Future<Map<String, String>> loadData(WidgetRef ref) async {
   var storage = StorageService.storage;
   final data = await storage.readAll();
 

@@ -1,11 +1,10 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:heart365_for_fitbit/consts/plain_consts.dart';
 import 'package:heart365_for_fitbit/services/data_process_service.dart';
 import 'package:rxdart/rxdart.dart';
 
+import 'models/user_profile.dart';
 import 'provider/data_provider.dart';
 import 'services/storage_service.dart';
 import 'views/my_personal_data_widget.dart';
@@ -13,9 +12,13 @@ import 'utils/encryption_utils.dart';
 import 'views/webview_screen.dart';
 import 'consts/about_user.dart';
 
+double? screenWidth;
+double? screenHeight;
+
 void main() {
-  var appDataDir = Directory('/data/data/com.jaeeun.shin.heart365_for_fitbit/');
-  print(appDataDir.path);
+  //appDataDir 얻기 위해 한 번 씀.
+  // var appDataDir = Directory('/data/data/com.jaeeun.shin.heart365_for_fitbit/');
+  // print(appDataDir.path);
   runApp(
     const ProviderScope(
       child: MyApp(),
@@ -28,7 +31,11 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    screenWidth = MediaQuery.of(context).size.width;
+    screenHeight = MediaQuery.of(context).size.height;
+
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: appname,
       theme: appTheme,
       home: const MyHomePage(),
@@ -47,12 +54,21 @@ class MyHomePageState extends ConsumerState<MyHomePage> {
   String codeVerifier = '';
   String state = '';
 
-  //싱글톤 객체 만들어 놓음
+  //싱글톤 객체 만들어 놓음.
   var storage = StorageService.storage;
 
   //rxdart stream을 시작하자!
   final allOfUserDataController =
-      BehaviorSubject<Map<String, dynamic>>.seeded({}); // 초기 빈 맵으로 시작
+      BehaviorSubject<UserProfile>.seeded(UserProfile(
+    age: '0',
+    avatar: '',
+    dateOfBirth: '',
+    displayName: '',
+    encodedId: '',
+    fullName: '',
+    gender: '',
+    memberSince: '',
+  )); // 초기 빈 맵으로 시작.
 
   @override
   void initState() {
@@ -60,7 +76,17 @@ class MyHomePageState extends ConsumerState<MyHomePage> {
     codeVerifier = generateCodeVerifier();
     state = generateState();
     loadData(ref).then((data) {
-      allOfUserDataController.add(data);
+      final userProfile = UserProfile(
+        age: data['age'] ?? '0',
+        avatar: data['avatar'] ?? '',
+        dateOfBirth: data['dateOfBirth'] ?? '',
+        displayName: data['displayName'] ?? '',
+        encodedId: data['encodedId'] ?? '',
+        fullName: data['fullName'] ?? '',
+        gender: data['gender'] ?? '',
+        memberSince: data['memberSince'] ?? '',
+      );
+      allOfUserDataController.add(userProfile);
     });
   }
 
@@ -72,63 +98,70 @@ class MyHomePageState extends ConsumerState<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    // 현재 화면의 너비와 높이 가져오기
-    double width = MediaQuery.of(context).size.width;
-    double height = MediaQuery.of(context).size.height;
-
-    return StreamBuilder<Map<String, dynamic>>(
+    return StreamBuilder<UserProfile>(
       stream: allOfUserDataController.stream,
       builder: (context, snapshot) {
         if (!snapshot.hasData || snapshot.data == null) {
-          return const CircularProgressIndicator(); // 로딩 인디케이터
+          return const CircularProgressIndicator();
         }
         final data = snapshot.data!;
 
         return Scaffold(
           appBar: AppBar(
-            title: data['displayName'] != null
-                ? Text('${data['displayName']}님 차트')
+            title: data.displayName != null
+                ? Text('${data.displayName}님 차트')
                 : const Text('메인 페이지'),
           ),
-          body: SingleChildScrollView(
+          body: SizedBox(
+            height: screenHeight,
+            width: screenWidth,
             child: Column(
               children: [
                 if (ref.watch(hasDataStateProvider)) ...[
-                  MyPersonalDataWidget(
-                    userData: data,
-                  ), //내 개인 데이터 대시보드
-                ] else ...[
-                  const Center(
-                    child: Text('핏빗 로그인을 먼저 해 주세요!'),
+                  Expanded(
+                    child: MyPersonalDataWidget(
+                      userData: data,
+                    ),
                   ),
-                  ElevatedButton(
-                    onPressed: () {
-                      final Uri authUrl = Uri.https(
-                        'www.fitbit.com',
-                        '/oauth2/authorize',
-                        {
-                          'response_type': 'code',
-                          'client_id': clientId,
-                          'scope': scope,
-                          'code_challenge': createCodeChallenge(codeVerifier),
-                          'code_challenge_method': 'S256',
-                          'state': state,
-                          'prompt': 'login',
-                          'redirect_uri': redirectUrl,
-                        },
-                      );
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => WebViewScreen(
-                            uri: authUrl,
-                            codeVerifier: codeVerifier,
-                            originalState: state,
-                          ),
+                ] else ...[
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.max,
+                      children: [
+                        const Text('핏빗 로그인을 먼저 해 주세요!'),
+                        ElevatedButton(
+                          onPressed: () {
+                            final Uri authUrl = Uri.https(
+                              'www.fitbit.com',
+                              '/oauth2/authorize',
+                              {
+                                'response_type': 'code',
+                                'client_id': clientId,
+                                'scope': scope,
+                                'code_challenge':
+                                    createCodeChallenge(codeVerifier),
+                                'code_challenge_method': 'S256',
+                                'state': state,
+                                'prompt': 'login',
+                                'redirect_uri': redirectUrl,
+                              },
+                            );
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => WebViewScreen(
+                                  uri: authUrl,
+                                  codeVerifier: codeVerifier,
+                                  originalState: state,
+                                ),
+                              ),
+                            );
+                          },
+                          child: const Text('구글로 핏빗 로그인'),
                         ),
-                      );
-                    },
-                    child: const Text('구글로 핏빗 로그인'),
+                      ],
+                    ),
                   ),
                 ]
               ],

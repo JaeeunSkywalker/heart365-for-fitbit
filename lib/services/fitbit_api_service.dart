@@ -49,7 +49,7 @@ class FitbitApiService {
 
     final jsonResponse = await _get('/1/user/$userId/ecg/list.json', data: data);
 
-    // EcgReading 리스트로 변환
+    // EcgReading 리스트로 변환.
     //ECG Log List를 불러 오면 ecgReadings, pagination 두 개의 주요 키에 먼저 접근 가능하다.
     List<EcgReading> readings = (jsonResponse['ecgReadings'] as List)
         .map((e) => EcgReading.fromJson(e))

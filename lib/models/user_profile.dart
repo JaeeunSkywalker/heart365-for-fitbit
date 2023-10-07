@@ -1,8 +1,8 @@
 class UserProfile {
-
   final String? displayName;
   final String? fullName;
-  //age는 int인데 flutter_secure_storage에 저장할 때 String으로만 저장이 되므로...
+
+  //age는 int인데 flutter_secure_storage에 저장할 때 String으로만 저장이 되므로.
   final String? age;
   final String? dateOfBirth;
   final String? gender;

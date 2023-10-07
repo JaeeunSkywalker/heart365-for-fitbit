@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
-//앱 이름
+//앱 이름.
 const String appname = "Heart365";
 
-//앱 테마
+//앱 테마.
 final ThemeData appTheme = ThemeData(
-  // 기본적인 배경색은 조금 더 부드러운 검은색으로 설정
+  // 기본적인 배경색은 조금 더 부드러운 검은색으로 설정.
   primaryColor: const Color(0xFF1A1A1A),
   scaffoldBackgroundColor: const Color(0xFF1A1A1A),
   // 부가적인 배경색은 조금 밝게 설정하여 계층 감을 주어 사용자에게 포커스를 줍니다.
