@@ -25,6 +25,7 @@ class MyDataWidgetState extends ConsumerState<MyDataWidget> {
   String? ecgDataFromFile;
   static const storage = StorageService.storage;
   var service = FitbitApiService();
+  int numberOfEcgReadings = 0;
 
   //페이지네이션을 위한 현재 페이지 인덱스
   int pageIndex = 0;
@@ -57,9 +58,11 @@ class MyDataWidgetState extends ConsumerState<MyDataWidget> {
               if (snapshot.hasData) {
                 return Column(
                   children: [
-                    Text('데이터 기록 시간: ${formattedDate(snapshot.data!.startTime)}'),
+                    Text(
+                        '데이터 기록 시간: ${formattedDate(snapshot.data!.startTime)}'),
                     Text('ECG 측정 시 평균 심박수: ${snapshot.data!.averageHeartRate}'),
-                    Text('ECG 결과: ${getKoreanClassification(snapshot.data!.resultClassification)}'),
+                    Text(
+                        'ECG 결과: ${getKoreanClassification(snapshot.data!.resultClassification)}'),
                     const SizedBox(height: 40.0),
                     CustomPaint(
                       painter: EcgPainter(data: snapshot.data!.waveformSamples),
@@ -86,13 +89,14 @@ class MyDataWidgetState extends ConsumerState<MyDataWidget> {
                   Text("${pageIndex + 1}"), // 사용자에게는 1부터 시작하는 번호로 보여줍니다.
                   IconButton(
                     icon: const Icon(Icons.arrow_right),
-                    onPressed: pageIndex < 2
+                    onPressed: pageIndex < numberOfEcgReadings - 1
                         ? _incrementPageIndex
                         : null, // 마지막 페이지면 비활성화
                   ),
                 ],
               )
             : Container(),
+        Text('ECG 검사 횟수: $numberOfEcgReadings'),
         TextButton(
           //index는 0부터 시작한다.
           //나는 핏빗에 ECG 데이터를 3개만 저장했다.
@@ -149,6 +153,7 @@ class MyDataWidgetState extends ConsumerState<MyDataWidget> {
     //pageIndex를 기반으로 데이터 가져 오기.
     final waveformSamples = List<int>.from(
         ecgDataDecodedFromJson['readings'][pageIndex]['waveformSamples']);
+    numberOfEcgReadings = ecgDataDecodedFromJson['readings'].length;
     final startTime =
         ecgDataDecodedFromJson['readings'][pageIndex]['startTime'];
     final averageHeartRate =
