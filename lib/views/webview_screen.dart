@@ -100,7 +100,7 @@ class WebViewScreenState extends ConsumerState<WebViewScreen> {
         'refreshToken': tokenResponse.data['refresh_token'],
       };
 
-      //accessToken, userId 저장.
+      //accessToken, userId, refreshToken 저장.
       tokenDataToStore.forEach((key, value) {
         storage.write(key: key, value: value);
       });

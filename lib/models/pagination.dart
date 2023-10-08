@@ -1,9 +1,8 @@
 class Pagination {
   //이 날 이후의 데이터를 불러 온다.
-  final String afterDate;
-
+  // final String afterDate;
   //이 날 전의 데이터를 불러 온다.
-  // final String beforeDate;
+  final String beforeDate;
   //최대 10개, 요청 가능한 데이터 수.
   //한 번에 불러 올 수 있는 데이터의 양이 최대 10개라서,
   //그 이상의 데이터를 불러 오고 싶다면.
@@ -32,8 +31,8 @@ class Pagination {
   final String sort;
 
   Pagination({
-    required this.afterDate,
-    // required this.beforeDate,
+    // required this.afterDate,
+    required this.beforeDate,
     required this.limit,
     required this.next,
     required this.offset,
@@ -43,8 +42,8 @@ class Pagination {
 
   Map<String, dynamic> toJson() {
     return {
-      'afterDate': afterDate,
-      // 'beforeDate': beforeDate,
+      // 'afterDate': afterDate,
+      'beforeDate': beforeDate,
       'limit': limit,
       'next': next,
       'offset': offset,
@@ -55,8 +54,8 @@ class Pagination {
 
   factory Pagination.fromJson(Map<String, dynamic> json) {
     return Pagination(
-      afterDate: json['afterDate'],
-      // beforeDate: json['beforeDate'],
+      // afterDate: json['afterDate'],
+      beforeDate: json['beforeDate'],
       limit: json['limit'],
       next: json['next'],
       offset: json['offset'],
@@ -67,8 +66,9 @@ class Pagination {
 
   @override
   String toString() {
-    return 'Pagination(afterDate: $afterDate, '
-        // 'beforeDate: $beforeDate, '
+    return 'Pagination('
+        // 'afterDate: $afterDate, '
+        'beforeDate: $beforeDate, '
         'limit: $limit, next: $next, offset: $offset, previous: $previous, sort: $sort)';
   }
 }
