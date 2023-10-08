@@ -29,20 +29,45 @@ class MyDataWidgetState extends ConsumerState<MyDataWidget> {
 
   //페이지네이션을 위한 현재 페이지 인덱스
   int pageIndex = 0;
+  late PageController _pageController;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController(initialPage: pageIndex);
+    _pageController.addListener(() {
+      setState(() {
+        pageIndex = _pageController.page!.round();
+      });
+    });
+  }
 
   @override
   void dispose() {
+    _pageController.dispose();
     super.dispose();
     ecgDataController.close();
   }
 
+  void _incrementPageIndex() {
+    _pageController.nextPage(
+        duration: const Duration(milliseconds: 300), curve: Curves.easeIn);
+  }
+
+  void _decrementPageIndex() {
+    _pageController.previousPage(
+        duration: const Duration(milliseconds: 300), curve: Curves.easeIn);
+  }
+
   //StreamController for ECG 초기화.
-  final ecgDataController = BehaviorSubject<EcgReading>.seeded(EcgReading(
-    waveformSamples: [],
-    startTime: '',
-    averageHeartRate: 0,
-    resultClassification: '',
-  ));
+  final ecgDataController = BehaviorSubject<List<EcgReading>>.seeded([
+    EcgReading(
+      waveformSamples: [],
+      startTime: '',
+      averageHeartRate: 0,
+      resultClassification: '',
+    )
+  ]);
 
   @override
   Widget build(BuildContext context) {
@@ -52,21 +77,39 @@ class MyDataWidgetState extends ConsumerState<MyDataWidget> {
         if (ecgDataFromFile != null)
           // Text(ecgDataFromFile!),
           //ECG 데이터 페이지네이션
-          StreamBuilder<EcgReading>(
+          StreamBuilder<List<EcgReading>>(
             stream: ecgDataController.stream,
             builder: (context, snapshot) {
               if (snapshot.hasData) {
+                List<EcgReading> readings = snapshot.data!;
+                EcgReading firstReading =
+                    readings.first; // 첫 번째 EcgReading 가져오기
+
                 return Column(
                   children: [
+                    Text('데이터 기록 시간: ${formattedDate(firstReading.startTime)}'),
+                    Text('ECG 측정 시 평균 심박수: ${firstReading.averageHeartRate}'),
                     Text(
-                        '데이터 기록 시간: ${formattedDate(snapshot.data!.startTime)}'),
-                    Text('ECG 측정 시 평균 심박수: ${snapshot.data!.averageHeartRate}'),
-                    Text(
-                        'ECG 결과: ${getKoreanClassification(snapshot.data!.resultClassification)}'),
+                        'ECG 결과: ${getKoreanClassification(firstReading.resultClassification)}'),
                     const SizedBox(height: 40.0),
-                    CustomPaint(
-                      painter: EcgPainter(data: snapshot.data!.waveformSamples),
-                      size: Size(screenWidth!, screenHeight! / 5), //차트 크기 설정
+                    SizedBox(
+                      height: screenHeight! / 5,
+                      width: screenWidth!,
+                      child: PageView.builder(
+                        controller: _pageController, // PageController를 연결
+                        scrollDirection: Axis.horizontal,
+                        itemCount: numberOfEcgReadings,
+                        itemBuilder: (context, index) {
+                          EcgReading currentReading = readings[index];
+
+                          return CustomPaint(
+                            painter: EcgPainter(
+                                data: currentReading.waveformSamples),
+                            size: Size(
+                                screenWidth!, screenHeight! / 5), //차트 크기 설정
+                          );
+                        },
+                      ),
                     ),
                   ],
                 );
@@ -120,20 +163,6 @@ class MyDataWidgetState extends ConsumerState<MyDataWidget> {
     );
   }
 
-  void _incrementPageIndex() {
-    setState(() {
-      pageIndex++;
-      _loadData(pageIndex);
-    });
-  }
-
-  void _decrementPageIndex() {
-    setState(() {
-      pageIndex--;
-      _loadData(pageIndex);
-    });
-  }
-
   Future<void> _loadData(int pageIndex) async {
     String? userId = await storage.read(key: "userId");
 
@@ -151,34 +180,23 @@ class MyDataWidgetState extends ConsumerState<MyDataWidget> {
     //여기부터 RxDart+ECG 처리.
     //버튼을 클릭하면 최신 ECG 데이터가 스트림에 전달되어 차트가 업데이트 된다.
     //pageIndex를 기반으로 데이터 가져 오기.
-    final waveformSamples = List<int>.from(
-        ecgDataDecodedFromJson['readings'][pageIndex]['waveformSamples']);
     numberOfEcgReadings = ecgDataDecodedFromJson['readings'].length;
-    final startTime =
-        ecgDataDecodedFromJson['readings'][pageIndex]['startTime'];
-    final averageHeartRate =
-        ecgDataDecodedFromJson['readings'][pageIndex]['averageHeartRate'];
-    final resultClassification =
-        ecgDataDecodedFromJson['readings'][pageIndex]['resultClassification'];
 
-    final ecgReading = EcgReading(
-      waveformSamples: waveformSamples,
-      startTime: startTime,
-      averageHeartRate: averageHeartRate,
-      resultClassification: resultClassification,
-    );
+    List<EcgReading> allReadings =
+        ecgDataDecodedFromJson['readings'].map<EcgReading>((data) {
+      return EcgReading(
+        waveformSamples: List<int>.from(data['waveformSamples']),
+        startTime: data['startTime'],
+        averageHeartRate: data['averageHeartRate'],
+        resultClassification: data['resultClassification'],
+      );
+    }).toList();
 
     setState(
       () {
         ecgDataFromFile = newEcgDataFromFile;
-        // ecgDataController.add(waveformSamples);
-        // ecgDataController.add(startTime);
-        // ecgDataController.add(averageHeartRate);
-        // ecgDataController.add(resultClassification);
-        ecgDataController.add(ecgReading);
+        ecgDataController.add(allReadings);
       },
     );
-
-    // safePrint(profile.toString());
   }
 }
