@@ -30,14 +30,14 @@ Future<void> getRefreshToken() async {
       ),
     );
 
-    // 응답에서 필요한 값 추출
+    //응답에서 필요한 값 추출.
     Map<String, String> tokenDataToStore = {
       'accessToken': tokenResponse.data['access_token'],
       'userId': tokenResponse.data['user_id'],
       'refreshToken': tokenResponse.data['refresh_token'],
     };
 
-    // 새로운 accessToken, userId, refreshToken 저장
+    // 새로운 accessToken, userId, refreshToken 저장.
     tokenDataToStore.forEach((key, value) {
       storage.write(key: key, value: value);
     });

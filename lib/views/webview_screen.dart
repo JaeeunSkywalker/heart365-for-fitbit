@@ -134,7 +134,7 @@ class WebViewScreenState extends ConsumerState<WebViewScreen> {
         },
       );
 
-      // 스트림에 데이터 추가
+      //스트림에 데이터 추가.
       final userProfile = UserProfile(
         displayName: userDataToStore['displayName'],
         fullName: userDataToStore['fullName'],

@@ -1,6 +1,6 @@
 //수정할 거 없음. 검토 완료.
 
-//핏빗 API에서 User Data request 했을 때 받는 정보
+//핏빗 API에서 User Data request 했을 때 받는 정보.
 
 class UserProfile {
   final String? displayName;

@@ -2,11 +2,10 @@ import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:heart365_for_fitbit/services/refresh_token_service.dart';
 
-import '../views/my_data_widget.dart';
 
 //수정할 거 없음. 검토 완료.
 
-//400, 401 에러에 대응
+//400, 401 에러에 대응.
 
 class CustomInterceptors extends Interceptor {
   final Dio _dio;
@@ -18,11 +17,11 @@ class CustomInterceptors extends Interceptor {
     const storage = FlutterSecureStorage();
 
     if(err.response?.statusCode == 400) {
-      //1. 스토리지에서 리프레시 토큰 삭제 후 재 발행
+      //1. 스토리지에서 리프레시 토큰 삭제 후 재 발행.
       await storage.delete(key: 'refrehToken');
       getRefreshToken();
 
-      // 2. 갱신된 액세스 토큰으로 원래의 요청 재시도
+      // 2. 갱신된 액세스 토큰으로 원래의 요청 재시도.
       RequestOptions requestOptions = err.requestOptions;
 
       // RequestOptions 객체에서 Options 객체를 생성합니다.
@@ -48,10 +47,10 @@ class CustomInterceptors extends Interceptor {
     }
     
     if (err.response?.statusCode == 401) {
-      // 1. 액세스 토큰 갱신 로직 수행
+      // 1. 액세스 토큰 갱신 로직 수행.
       getRefreshToken();
 
-      // 2. 갱신된 액세스 토큰으로 원래의 요청 재시도
+      // 2. 갱신된 액세스 토큰으로 원래의 요청 재시도.
       RequestOptions requestOptions = err.requestOptions;
 
       // RequestOptions 객체에서 Options 객체를 생성합니다.

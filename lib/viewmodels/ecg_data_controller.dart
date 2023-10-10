@@ -1,8 +1,10 @@
+import 'dart:async';
+
 import 'package:rxdart/rxdart.dart';
 
 import '../models/ecg_reading.dart';
 
-//현재 스트림을 3개 관리 중
+//현재 스트림을 3개 관리 중.
 //그 중 두 번째가 ECG Data Stream(내가 지은 이름)!
 //값이 다음과 같이 리턴됩니다.
 // [EcgReading
@@ -20,8 +22,10 @@ class EcgDataController {
       resultClassification: '',
     )
   ]);
+
+  static StreamController<List<EcgReading>> _createEcgReadingDataController() {
+    return StreamController<List<EcgReading>>.broadcast();
+  }
 }
 
 final ecgDataController = EcgDataController();
-
-

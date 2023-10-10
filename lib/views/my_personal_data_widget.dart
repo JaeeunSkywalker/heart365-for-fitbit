@@ -4,7 +4,7 @@ import 'package:heart365_for_fitbit/models/user_profile.dart';
 import 'package:heart365_for_fitbit/views/my_data_widget.dart';
 
 import '../services/fitbit_api_service.dart';
-import '../services/load_avatar_image.dart';
+import '../services/load_avatar_image_service.dart';
 import '../services/storage_service.dart';
 
 //수정할 거 없음. 검토 완료.

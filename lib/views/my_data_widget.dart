@@ -5,15 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:heart365_for_fitbit/main.dart';
 import 'package:heart365_for_fitbit/models/ecg_reading.dart';
+import 'package:heart365_for_fitbit/services/real_time_ecg_chart_service.dart';
 import 'package:heart365_for_fitbit/utils/format_date_util.dart';
-import 'package:heart365_for_fitbit/services/grid_painter_service.dart';
 import 'package:heart365_for_fitbit/viewmodels/ecg_data_controller.dart';
 import 'package:heart365_for_fitbit/viewmodels/page_data_controller.dart';
 import 'package:heart365_for_fitbit/viewmodels/user_data_controller.dart';
 import 'package:dio/dio.dart';
 
 import '../provider/data_provider.dart';
-import '../services/ecg_painter_service.dart';
 import '../services/fitbit_api_service.dart';
 import '../services/storage_service.dart';
 import '../utils/get_korean_classification_util.dart';
@@ -33,13 +32,13 @@ class MyDataWidgetState extends ConsumerState<MyDataWidget>
   var service = FitbitApiService();
   int numberOfEcgReadings = 0;
 
-  // 페이지 컨트롤러 및 초기 스크롤 위치
+  // 페이지 컨트롤러 및 초기 스크롤 위치.
   final PageController _pageController = PageController(initialPage: 0);
 
-  // 기존 데이터 및 페이지 인덱스 설정
+  // 기존 데이터 및 페이지 인덱스 설정.
   int pageIndex = 0;
 
-  //커스터마이징 하면 되는 변수들
+  //커스터마이징 하면 되는 변수들.
   //1초의 ECG 데이터를 화면에 표시하려면 250개의 데이터 포인트가 필요하다.
   //5초나 10초의 데이터를 한 화면에 표시하는 것이 일반적이다.
   //여기서는 5초로 픽스함.
@@ -59,7 +58,7 @@ class MyDataWidgetState extends ConsumerState<MyDataWidget>
     });
   }
 
-  // 타이머를 클래스 레벨 변수로 이동
+  // 타이머를 클래스 레벨 변수로 이동.
   Timer? chartUpdateTimer;
 
   @override
@@ -109,60 +108,56 @@ class MyDataWidgetState extends ConsumerState<MyDataWidget>
                     return Container();
                   }
 
-                  return Column(
-                    children: [
-                      Text(
-                          '데이터 기록 시간: ${formatDate(ecgDataSnapshot.data![pageIndex].startTime)}'),
-                      Text(
-                          'ECG 측정 시 평균 심박수: ${ecgDataSnapshot.data![pageIndex].averageHeartRate}'),
-                      Text(
-                          'ECG 결과: ${getKoreanClassification(ecgDataSnapshot.data![pageIndex].resultClassification)}'),
-                      const SizedBox(height: 40.0),
-                      SizedBox(
-                        height: screenHeight! / 4,
-                        width: screenWidth!,
-                        child: PageView.builder(
-                          controller: _pageController,
-                          scrollDirection: Axis.horizontal,
-                          itemCount: numberOfEcgReadings,
-                          itemBuilder: (context, index) {
-                            // 현재 페이지의 waveform 데이터를 가져옵니다.
-                            List<int> currentPageWaveformData = ecgDataSnapshot
-                                .data![pageIndex].waveformSamples;
+                  return numberOfEcgReadings > 0
+                      ? Column(children: [
+                          Text(
+                              '데이터 기록 시간: ${formatDate(ecgDataSnapshot.data![pageIndex].startTime)}'),
+                          Text(
+                              'ECG 측정 시 평균 심박수: ${ecgDataSnapshot.data![pageIndex].averageHeartRate}'),
+                          Text(
+                              'ECG 결과: ${getKoreanClassification(ecgDataSnapshot.data![pageIndex].resultClassification)}'),
+                          const SizedBox(height: 40.0),
+                          SizedBox(
+                            height: screenHeight! / 4,
+                            width: screenWidth!,
+                            child: PageView.builder(
+                              controller: _pageController,
+                              scrollDirection: Axis.horizontal,
+                              itemCount: numberOfEcgReadings,
+                              itemBuilder: (context, index) {
+                                // 현재 페이지의 waveform 데이터를 가져옵니다.
+                                List<int> currentPageWaveformData =
+                                    ecgDataSnapshot
+                                        .data![pageIndex].waveformSamples;
 
-                            return Material(
-                              color: Colors.white,
-                              child: CustomPaint(
-                                size: Size(screenWidth!, screenHeight! / 4),
-                                painter: GridPainter(),
-                                foregroundPainter:
-                                    EcgPainter(data: currentPageWaveformData),
-                                child: Container(),
+                                return Material(
+                                  color: Colors.white,
+                                  child: RealTimeEcgChart(
+                                      allData: currentPageWaveformData),
+                                );
+                              },
+                            ),
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.arrow_left),
+                                onPressed:
+                                    pageIndex > 0 ? _decrementPageIndex : null,
                               ),
-                            );
-                          },
-                        ),
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.arrow_left),
-                            onPressed:
-                                pageIndex > 0 ? _decrementPageIndex : null,
+                              Text("${pageIndex + 1}"),
+                              IconButton(
+                                icon: const Icon(Icons.arrow_right),
+                                onPressed: pageIndex < numberOfEcgReadings - 1
+                                    ? _incrementPageIndex
+                                    : null,
+                              ),
+                            ],
                           ),
-                          Text("${pageIndex + 1}"),
-                          IconButton(
-                            icon: const Icon(Icons.arrow_right),
-                            onPressed: pageIndex < numberOfEcgReadings - 1
-                                ? _incrementPageIndex
-                                : null,
-                          ),
-                        ],
-                      ),
-                      Text('ECG 검사 횟수: $numberOfEcgReadings'),
-                    ],
-                  );
+                          Text('ECG 검사 횟수: $numberOfEcgReadings')
+                        ])
+                      : Container();
                 },
               );
             },
@@ -214,7 +209,7 @@ class MyDataWidgetState extends ConsumerState<MyDataWidget>
 
         ecgDataController.ecgReadingDataController.add(allReadings);
 
-        // allReadings에서 모든 waveformSamples을 추출하여 ecgPageDataController에 추가
+        // allReadings에서 모든 waveformSamples을 추출하여 ecgPageDataController에 추가.
         List<List<int>> allWaveformSamples =
             allReadings.map((reading) => reading.waveformSamples).toList();
         pageDataController.ecgPageDataController

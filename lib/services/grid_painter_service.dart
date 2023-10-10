@@ -27,9 +27,9 @@ class GridPainter extends CustomPainter {
 
     for (int j = 0; j <= 25; j++) {
       double y = stepSizeY * j;
-      if (j % 5 == 0) { // 큰 사각형의 선
+      if (j % 5 == 0) { // 큰 사각형의 선.
         canvas.drawLine(Offset(0, y), Offset(size.width, y), paintThick);
-      } else { // 작은 사각형의 선
+      } else { // 작은 사각형의 선.
         canvas.drawLine(Offset(0, y), Offset(size.width, y), paintThin);
       }
     }
