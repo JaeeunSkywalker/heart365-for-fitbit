@@ -18,6 +18,8 @@ import '../services/storage_service.dart';
 import '../utils/get_korean_classification_util.dart';
 import '../utils/read_and_write_to_file_util.dart';
 
+//수정할 거 없음. 검토 완료.
+
 class MyDataWidget extends ConsumerStatefulWidget {
   const MyDataWidget({super.key});
 

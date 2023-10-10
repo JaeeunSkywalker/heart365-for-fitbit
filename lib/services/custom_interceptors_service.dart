@@ -2,7 +2,6 @@ import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:heart365_for_fitbit/services/refresh_token_service.dart';
 
-
 //수정할 거 없음. 검토 완료.
 
 //400, 401 에러에 대응.

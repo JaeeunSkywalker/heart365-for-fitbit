@@ -4,6 +4,8 @@ import 'package:rxdart/rxdart.dart';
 
 import '../models/ecg_reading.dart';
 
+//수정할 거 없음. 검토 완료.
+
 //현재 스트림을 3개 관리 중.
 //그 중 두 번째가 ECG Data Stream(내가 지은 이름)!
 //값이 다음과 같이 리턴됩니다.

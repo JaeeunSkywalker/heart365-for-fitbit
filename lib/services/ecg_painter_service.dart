@@ -1,6 +1,8 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
+//수정할 거 없음. 검토 완료.
+
 class EcgPainter extends CustomPainter {
   final List<int> data;
 

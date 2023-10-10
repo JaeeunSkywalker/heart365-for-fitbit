@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'ecg_painter_service.dart';
 import 'grid_painter_service.dart';
 
+//수정할 거 없음. 검토 완료.
+
 class RealTimeEcgChart extends StatefulWidget {
   final List<int> allData;
 
