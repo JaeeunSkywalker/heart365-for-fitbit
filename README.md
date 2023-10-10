@@ -1,4 +1,5 @@
 # 🩺 하트365(Heart365): 당신의 심장 건강 관리 파트너<br>
+[![Heart365 for Fitbit](https://img.youtube.com/vi/3JMTz6xUH2I/maxresdefault.jpg)](https://youtu.be/3JMTz6xUH2I?feature=shared "Heart365 for Fitbit")<br>
 하트365는 심전도(ECG, EKG) 데이터를 분석하고 관리하는 플러터(Flutter) 기반 모바일 앱입니다.<br>
 이 앱은 사용자들이 건강 데이터를 더 효과적으로 이해하고 관리할 수 있도록 도와주는 목적으로 개발되었습니다.<br>
 ## 🌟 주요 기능
