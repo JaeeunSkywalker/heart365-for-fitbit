@@ -2,15 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:heart365_for_fitbit/consts/plain_consts.dart';
 import 'package:heart365_for_fitbit/services/data_process_service.dart';
-import 'package:rxdart/rxdart.dart';
+import 'package:heart365_for_fitbit/viewmodels/user_data_controller.dart';
 
 import 'models/user_profile.dart';
 import 'provider/data_provider.dart';
 import 'services/storage_service.dart';
 import 'views/my_personal_data_widget.dart';
-import 'utils/encryption_utils.dart';
+import 'utils/encryption_util.dart';
 import 'views/webview_screen.dart';
 import 'consts/about_user.dart';
+
+//수정할 거 없음. 검토 완료.
 
 double? screenWidth;
 double? screenHeight;
@@ -58,48 +60,39 @@ class MyHomePageState extends ConsumerState<MyHomePage> {
   var storage = StorageService.storage;
 
   //rxdart stream을 시작하자!
-  final allOfUserDataController =
-      BehaviorSubject<UserProfile>.seeded(UserProfile(
-    age: '0',
-    avatar: '',
-    dateOfBirth: '',
-    displayName: '',
-    encodedId: '',
-    fullName: '',
-    gender: '',
-    memberSince: '',
-  )); // 초기 빈 맵으로 시작.
 
   @override
   void initState() {
     super.initState();
     codeVerifier = generateCodeVerifier();
     state = generateState();
-    loadData(ref).then((data) {
-      final userProfile = UserProfile(
-        age: data['age'] ?? '0',
-        avatar: data['avatar'] ?? '',
-        dateOfBirth: data['dateOfBirth'] ?? '',
-        displayName: data['displayName'] ?? '',
-        encodedId: data['encodedId'] ?? '',
-        fullName: data['fullName'] ?? '',
-        gender: data['gender'] ?? '',
-        memberSince: data['memberSince'] ?? '',
-      );
-      allOfUserDataController.add(userProfile);
-    });
+    loadExistedData(ref).then(
+      (data) {
+        final userProfile = UserProfile(
+          age: data['age'] ?? '0',
+          avatar: data['avatar'] ?? '',
+          dateOfBirth: data['dateOfBirth'] ?? '',
+          displayName: data['displayName'] ?? '',
+          encodedId: data['encodedId'] ?? '',
+          fullName: data['fullName'] ?? '',
+          gender: data['gender'] ?? '',
+          memberSince: data['memberSince'] ?? '',
+        );
+        userDataController.allOfUserDataController.add(userProfile);
+      },
+    );
   }
 
   @override
   void dispose() {
     super.dispose();
-    allOfUserDataController.close(); // 리소스를 해제합니다.
+    userDataController.allOfUserDataController.close(); // 리소스를 해제합니다.
   }
 
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<UserProfile>(
-      stream: allOfUserDataController.stream,
+      stream: userDataController.allOfUserDataController.stream,
       builder: (context, snapshot) {
         if (!snapshot.hasData || snapshot.data == null) {
           return const CircularProgressIndicator();
@@ -108,7 +101,7 @@ class MyHomePageState extends ConsumerState<MyHomePage> {
 
         return Scaffold(
           appBar: AppBar(
-            title: data.displayName != null
+            title: data.displayName!.isNotEmpty
                 ? Text('${data.displayName}님 차트')
                 : const Text('메인 페이지'),
           ),

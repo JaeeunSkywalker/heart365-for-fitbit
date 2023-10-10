@@ -1,7 +1,9 @@
 import 'package:riverpod/riverpod.dart';
 import 'package:rxdart/rxdart.dart';
 
-import '../services/storage_service.dart';
+import '../models/user_profile.dart';
+
+//수정할 거 없음. 검토 완료.
 
 //flutter_secure_storage에 데이터가 있는지 확인하는 flag.
 final hasDataStateProvider = StateProvider<bool>((ref) => false);

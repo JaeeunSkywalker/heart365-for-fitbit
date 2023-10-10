@@ -1,3 +1,7 @@
+//수정할 거 없음. 검토 완료.
+
+//핏빗 API에서 ECG Data request 했을 때 받는 정보 모델
+
 class EcgReading {
   //ECG, EKG 모두 심전도입니다.
   //핏빗에서 데이터가 기록되기 시작한 시간.
@@ -97,6 +101,6 @@ class EcgReading {
 
   @override
   String toString() {
-    return 'EcgReading(startTime: $startTime, averageHeartRate: $averageHeartRate, resultClassification: $resultClassification, waveformSamples: ${waveformSamples.toString()}, samplingFrequencyHz: $samplingFrequencyHz, scalingFactor: $scalingFactor, numberOfWaveformSamples: $numberOfWaveformSamples, leadNumber: $leadNumber, featureVersion: $featureVersion, deviceName: $deviceName, firmwareVersion: $firmwareVersion)';
+    return 'EcgReading(startTime: $startTime, averageHeartRate: $averageHeartRate, resultClassification: $resultClassification, waveformSamples: ${waveformSamples.toString()}, samplingFrequencyHz: $samplingFrequencyHz, scalingFactor: $scalingFactor, numberOfWaveformSamples: $numberOfWaveformSamples, leadNumber: $leadNumber, featureVersion: $featureVersion, deviceName: $deviceName, firmwareVersion: $firmwareVersion,)';
   }
 }

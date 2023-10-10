@@ -5,7 +5,9 @@ import '../models/ecg_log_list.dart';
 import '../models/ecg_reading.dart';
 import '../models/pagination.dart';
 import '../models/user_profile.dart';
-import 'custom_interceptors.dart';
+import 'custom_interceptors_service.dart';
+
+//수정할 거 없음. 검토 완료.
 
 class FitbitApiService {
   final Dio _dio = Dio();
@@ -45,9 +47,6 @@ class FitbitApiService {
         "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
 
     final data = {
-      //오늘 기준으로 한 달 전 데이터까지 불러 올 수 있게.
-      //이를 위해서는 현재 시간과 날짜를 불러와서 상태관리해야 한다.
-      //그 전에는 2023-01-01로 하드코딩한다.
       // 'afterDate': afterDate,
       'beforeDate': beforeDate,
       'sort': 'desc',

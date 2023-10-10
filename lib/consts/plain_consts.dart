@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 
+//수정할 거 없음. 검토 완료.
+
+//앱 테마
+
 //앱 이름.
 const String appname = "Heart365";
 

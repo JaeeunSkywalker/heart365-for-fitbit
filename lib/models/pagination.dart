@@ -1,3 +1,7 @@
+//수정할 거 없음. 검토 완료.
+
+//핏빗 API에서 ECG Data request 했을 때 받는 정보 모델
+
 class Pagination {
   //이 날 이후의 데이터를 불러 온다.
   // final String afterDate;

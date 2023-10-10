@@ -2,13 +2,17 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:heart365_for_fitbit/consts/about_user.dart';
-import 'package:heart365_for_fitbit/services/data_process_service.dart';
-import 'package:heart365_for_fitbit/utils/logger_utils.dart';
+import 'package:heart365_for_fitbit/utils/logger_util.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
+import '../models/user_profile.dart';
 import '../provider/data_provider.dart';
+import '../services/data_process_service.dart';
 import '../services/fitbit_api_service.dart';
 import '../services/storage_service.dart';
+import '../viewmodels/user_data_controller.dart';
+
+//수정할 거 없음. 검토 완료.
 
 class WebViewScreen extends ConsumerStatefulWidget {
   final Uri uri;
@@ -101,9 +105,11 @@ class WebViewScreenState extends ConsumerState<WebViewScreen> {
       };
 
       //accessToken, userId, refreshToken 저장.
-      tokenDataToStore.forEach((key, value) {
-        storage.write(key: key, value: value);
-      });
+      tokenDataToStore.forEach(
+        (key, value) async {
+          await storage.write(key: key, value: value);
+        },
+      );
 
       var service = FitbitApiService();
       service.initialize(tokenDataToStore['accessToken']!);
@@ -122,11 +128,27 @@ class WebViewScreenState extends ConsumerState<WebViewScreen> {
       };
 
       //userData 저장.
-      userDataToStore.forEach((key, value) {
-        storage.write(key: key, value: value);
-      });
+      userDataToStore.forEach(
+        (key, value) async {
+          await storage.write(key: key, value: value);
+        },
+      );
 
-      loadData(ref);
+      // 스트림에 데이터 추가
+      final userProfile = UserProfile(
+        displayName: userDataToStore['displayName'],
+        fullName: userDataToStore['fullName'],
+        age: userDataToStore['age'],
+        dateOfBirth: userDataToStore['dateOfBirth'],
+        gender: userDataToStore['gender'],
+        encodedId: userDataToStore['encodedId'],
+        memberSince: userDataToStore['memberSince'],
+        avatar: userDataToStore['avatar'],
+      );
+
+      userDataController.allOfUserDataController.add(userProfile);
+
+      await loadExistedData(ref);
 
       //웹뷰에서 'webpage not available'를 표시하지 않기 위해 리디렉션을 중지.
       //하는 코드이나 실제로 적용하면 무한 로딩 발생해서 적용하지 않음.

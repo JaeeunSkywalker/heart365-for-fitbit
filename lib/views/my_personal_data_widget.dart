@@ -4,7 +4,10 @@ import 'package:heart365_for_fitbit/models/user_profile.dart';
 import 'package:heart365_for_fitbit/views/my_data_widget.dart';
 
 import '../services/fitbit_api_service.dart';
+import '../services/load_avatar_image.dart';
 import '../services/storage_service.dart';
+
+//수정할 거 없음. 검토 완료.
 
 class MyPersonalDataWidget extends ConsumerStatefulWidget {
   final UserProfile userData;
@@ -46,9 +49,7 @@ class MyPersonalDataWidgetState extends ConsumerState<MyPersonalDataWidget> {
                 height: 100.0,
                 decoration: BoxDecoration(
                   image: DecorationImage(
-                    //TODO:이미지를 캐싱할 수 있지 않을까?
-                    image: NetworkImage(widget.userData.avatar ??
-                        'https://images.unsplash.com/photo-1533743983669-94fa5c4338ec?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=792&q=80'),
+                    image: loadAvatarImage(widget.userData.avatar),
                     fit: BoxFit.cover,
                   ),
                 ),
