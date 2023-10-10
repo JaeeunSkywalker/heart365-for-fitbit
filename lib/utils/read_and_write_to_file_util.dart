@@ -9,7 +9,8 @@ import 'dart:io';
 String appDataDirectory = '/data/data/com.jaeeun.shin.heart365_for_fitbit/';
 
 Future<File> writeToFile(String data, String fileName) async {
-  final directory = Directory(appDataDirectory);  // 여기서 'appDataDirectory'는 실제 앱 데이터 디렉토리 경로로 변경해야 합니다.
+  final directory = Directory(
+      appDataDirectory); // 여기서 'appDataDirectory'는 실제 앱 데이터 디렉토리 경로로 변경해야 합니다.
   if (!await directory.exists()) {
     await directory.create(recursive: true);
   }
@@ -18,7 +19,8 @@ Future<File> writeToFile(String data, String fileName) async {
 }
 
 Future<String> readFromFile(String fileName) async {
-  final directory = Directory(appDataDirectory);  // 여기서 'appDataDirectory'는 실제 앱 데이터 디렉토리 경로로 변경해야 합니다.
+  final directory = Directory(
+      appDataDirectory); // 여기서 'appDataDirectory'는 실제 앱 데이터 디렉토리 경로로 변경해야 합니다.
   final file = File('${directory.path}/$fileName');
   if (await file.exists()) {
     return file.readAsString();

@@ -15,7 +15,7 @@ class CustomInterceptors extends Interceptor {
   Future onError(DioException err, ErrorInterceptorHandler handler) async {
     const storage = FlutterSecureStorage();
 
-    if(err.response?.statusCode == 400) {
+    if (err.response?.statusCode == 400) {
       //1. 스토리지에서 리프레시 토큰 삭제 후 재 발행.
       await storage.delete(key: 'refrehToken');
       getRefreshToken();
@@ -37,14 +37,14 @@ class CustomInterceptors extends Interceptor {
           requestOptions.path,
           options: options,
           queryParameters:
-          requestOptions.queryParameters, // 필요한 경우 쿼리 파라미터도 추가합니다.
+              requestOptions.queryParameters, // 필요한 경우 쿼리 파라미터도 추가합니다.
         );
         return handler.resolve(response);
       } catch (e) {
         return super.onError(err, handler);
       }
     }
-    
+
     if (err.response?.statusCode == 401) {
       // 1. 액세스 토큰 갱신 로직 수행.
       getRefreshToken();

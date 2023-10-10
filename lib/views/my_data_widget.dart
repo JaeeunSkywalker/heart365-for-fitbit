@@ -67,8 +67,12 @@ class MyDataWidgetState extends ConsumerState<MyDataWidget>
   void dispose() {
     _pageController.dispose();
     chartUpdateTimer?.cancel();
-    ecgDataController.ecgReadingDataController.close();
-    pageDataController.ecgPageDataController.close();
+    if (!ecgDataController.ecgReadingDataController.isClosed) {
+      ecgDataController.ecgReadingDataController.close();
+    }
+    if (!pageDataController.ecgPageDataController.isClosed) {
+      pageDataController.ecgPageDataController.close();
+    }
     super.dispose();
   }
 

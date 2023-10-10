@@ -18,18 +18,22 @@ class GridPainter extends CustomPainter {
 
     for (int i = 0; i <= 50; i++) {
       double x = stepSizeX * i;
-      if (i % 5 == 0) { // 큰 사각형의 선
+      if (i % 5 == 0) {
+        // 큰 사각형의 선
         canvas.drawLine(Offset(x, 0), Offset(x, size.height), paintThick);
-      } else { // 작은 사각형의 선
+      } else {
+        // 작은 사각형의 선
         canvas.drawLine(Offset(x, 0), Offset(x, size.height), paintThin);
       }
     }
 
     for (int j = 0; j <= 25; j++) {
       double y = stepSizeY * j;
-      if (j % 5 == 0) { // 큰 사각형의 선.
+      if (j % 5 == 0) {
+        // 큰 사각형의 선.
         canvas.drawLine(Offset(0, y), Offset(size.width, y), paintThick);
-      } else { // 작은 사각형의 선.
+      } else {
+        // 작은 사각형의 선.
         canvas.drawLine(Offset(0, y), Offset(size.width, y), paintThin);
       }
     }

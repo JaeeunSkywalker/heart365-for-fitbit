@@ -7,6 +7,7 @@ class Pagination {
   // final String afterDate;
   //이 날 전의 데이터를 불러 온다.
   final String beforeDate;
+
   //최대 10개, 요청 가능한 데이터 수.
   //한 번에 불러 올 수 있는 데이터의 양이 최대 10개라서,
   //그 이상의 데이터를 불러 오고 싶다면.

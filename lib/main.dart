@@ -85,8 +85,10 @@ class MyHomePageState extends ConsumerState<MyHomePage> {
 
   @override
   void dispose() {
+    if (!userDataController.allOfUserDataController.isClosed) {
+      userDataController.allOfUserDataController.close();
+    }
     super.dispose();
-    userDataController.allOfUserDataController.close(); // 리소스를 해제합니다.
   }
 
   @override

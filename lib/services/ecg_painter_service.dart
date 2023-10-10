@@ -42,7 +42,7 @@ class EcgPainter extends CustomPainter {
     for (int i = 0; i < data.length - 1; i++) {
       double startX = renderFromRightToLeft ? size.width - dx * i : dx * i;
       double endX =
-      renderFromRightToLeft ? size.width - dx * (i + 1) : dx * (i + 1);
+          renderFromRightToLeft ? size.width - dx * (i + 1) : dx * (i + 1);
 
       double startY = size.height -
           (data[i] - minValue) * verticalScaling -
